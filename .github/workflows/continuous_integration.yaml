@@ -13,10 +13,8 @@ concurrency:
 jobs:
   static_analysis:
     name: Static Analysis
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    uses: ./.github/workflows/static_analysis.yaml
+    secrets: inherit
 
   unit_tests:
     needs: static_analysis
@@ -34,10 +32,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-  pr_comment:
+  validate_results:
     needs:
       - unit_tests
       - integration_tests
+    name: Validate Results
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+  pr_comment:
+    needs: validate_results
     name: PR Comment
     runs-on: ubuntu-latest
     steps:
@@ -45,9 +51,7 @@ jobs:
         uses: actions/checkout@v4
 
   slack_notification:
-    needs:
-      - unit_tests
-      - integration_tests
+    needs: validate_results
     name: Slack Notification
     runs-on: ubuntu-latest
     steps:

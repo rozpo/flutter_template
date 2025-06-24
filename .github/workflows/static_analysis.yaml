@@ -1,0 +1,24 @@
+name: Static Analysis
+
+on:
+  workflow_call:
+
+jobs:
+  static_analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter doctor
+        run: flutter --doctor
+
+      - name: Run static analysis
+        run: |
+          flutter analyze
+          dart format --set-exit-if-changed .
