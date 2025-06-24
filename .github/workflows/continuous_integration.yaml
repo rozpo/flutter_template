@@ -1,0 +1,59 @@
+name: Continuous Integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static_analysis:
+    name: Static Analysis
+    uses: ./.github/workflows/static_analysis.yaml
+    secrets: inherit
+
+  unit_tests:
+    needs: static_analysis
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+  integration_tests:
+    needs: static_analysis
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+  validate_results:
+    needs:
+      - unit_tests
+      - integration_tests
+    name: Validate Results
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+  pr_comment:
+    needs: validate_results
+    name: PR Comment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+  slack_notification:
+    needs: validate_results
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
